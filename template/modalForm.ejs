@@ -1,76 +1,97 @@
-import React, {useState, useEffect, useMemo} from 'react';
-import {Input} from "antd";
-import {formatNumber} from "@/utils/utils";
-import {useUpdateEffect} from "ahooks";
-import _ from "lodash";
+import React, { useEffect, useState } from 'react';
+import { Button, Form, message, Modal } from 'antd';
+import { ItemType } from '@ebonex/ebonex-ui/lib/quick-form/BaseForm/types';
+import { QuickForm } from '@ebonex/ebonex-ui';
 
-const MyInputNumber = (
-  {
-    value,
-    onChange,
-    onBlur,
-    ccy,
-    integerLen = 18,//整数长度
-    decimalLen=2, //小数长度
-    showComma = false,//展示逗号
-    ...restProps
-  }
-)=>{
-
-  const triggerChange = changedValue => {
-    onChange?.(changedValue)
-  }
-
-  const onFormatValue = (v,config)=>{
-    if(!v){
-      triggerChange?.(v);
-      return v;
-    }
-
-    v = v.replace(/[^\d.]/g,"") //清除除了数字和点以外的字符
-      .replace(/\.{2,}/g,".").replace(".","$#$").replace(/\./g,"").replace("$#$","."); //只保留第一个. 清除多余的
-
-    const result = formatNumber(v,{ccy,integerLen,decimalLen,hasComma:false,...config});
-    triggerChange?.(result);
-    return result
-  }
-
-  const onInputChange = (v)=>{
-    onFormatValue(v,{zeroFill: false});
-  }
-
-  const onInputBlur = (v)=>{
-    if(v){
-      const result = onFormatValue(v,{zeroFill: true});
-      onBlur?.(result);
-    }
-  }
-
-  useUpdateEffect(()=>{
-    onFormatValue(value)
-  },[ccy])
-
-  const formatValue = useMemo(() => {
-    if(!value) return '';
-    if(!showComma) return value;
-    return value.split('.').map((a,index) =>{
-      if(index===0){
-        return  _.toString(a).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-      }else {
-        return _.toString(a)
-      }
-    }).join('.')
-  }, [value])
-
-  return(
-    <Input
-      value={formatValue}
-      onChange={e=>onInputChange(e.target.value)}
-      onBlur={(e)=>onInputBlur(e.target.value)}
-      maxLength={integerLen+decimalLen+1}
-      {...restProps}
-    />
-  )
+interface Cprops {
+  open: boolean;
+  onSuccess: () => void;
+  onCancel: () => void;
 }
 
-export default MyInputNumber
+const <%= data.name %>: React.FC<Cprops> = ({ open, onSuccess, onCancel }) => {
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+  const handleSubmit = async () => {
+    setLoading(true);
+
+    form
+      .validateFields()
+      .then((res) => {
+        // 此处promise替换成接口
+        return new Promise((r) => {
+          setTimeout(() => r({ success: true }), 300);
+        });
+      })
+      .then((res: any) => {
+        if (res.success) onSuccess();
+        else message.error(res.msg)
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+  const schema: ItemType[] = [
+    {
+      id: 'Field1',
+      label: 'Field1',
+      type: 'text',
+      formItemProps: {
+        rules: [{ required: true }],
+      },
+    },
+    {
+      id: 'Field2',
+      label: 'Field2',
+      type: 'checkbox',
+      formItemProps: {
+        rules: [{ required: true }],
+      },
+      fieldProps: {
+        options: [
+          { label: 'React', value: 'React' },
+          { label: 'VUE', value: 'VUE' },
+        ],
+      },
+    },
+    {
+      id: 'Field3',
+      label: 'Field3',
+      type: 'select',
+      formItemProps: {
+        rules: [{ required: true }],
+      },
+      fieldProps: {
+        options: [
+          { label: 'React', value: 'React' },
+          { label: 'VUE', value: 'VUE' },
+        ],
+      },
+    },
+  ];
+
+  const footerBtns = [
+    <Button key="cancel" onClick={onCancel}>
+      Cancel
+    </Button>,
+    <Button
+      key="submit"
+      type="primary"
+      loading={loading}
+      onClick={handleSubmit}
+    >
+      Submit
+    </Button>,
+  ];
+
+  useEffect(() => {
+    if (open) form.resetFields();
+  }, [open]);
+
+  return (
+    <Modal title="Create" open={open} onCancel={onCancel} footer={footerBtns}>
+      <QuickForm form={form} schema={schema} submitButtonShow={false} />
+    </Modal>
+  );
+};
+export default <%= data.name %>;
