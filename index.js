@@ -14,6 +14,7 @@ window.addEventListener('load', function () {
   button.addEventListener('click', function () {
     // 如果用户同意就创建一个通知
     if (window.Notification && Notification.permission === "granted") {
+      debugger
       var n = new Notification("Hi!");
     }
 
@@ -21,6 +22,7 @@ window.addEventListener('load', function () {
     // 注：因为在 Chrome 中我们无法确定 permission 属性是否有值，因此
     // 检查该属性的值是否是 "default" 是不安全的。
     else if (window.Notification && Notification.permission !== "denied") {
+      debugger
       Notification.requestPermission(function (status) {
         if (Notification.permission !== status) {
           Notification.permission = status;
@@ -40,6 +42,7 @@ window.addEventListener('load', function () {
 
     // 如果用户拒绝接受通知
     else {
+      debugger
       // 我们可以让步的使用常规模态的 alert
       alert("Hi!");
     }
